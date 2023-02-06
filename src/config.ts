@@ -12,9 +12,9 @@ if (fs.existsSync("./config.yaml")) {
   configFile = {
     chatGPTAccountPool: [
       {
-        // email: process.env.CHAT_GPT_EMAIL,
-        // password: process.env.CHAT_GPT_PASSWORD,
-        apiKey: process.env.CHAT_GPT_API_KEY,
+        email: process.env.CHAT_GPT_EMAIL,
+        password: process.env.CHAT_GPT_PASSWORD,
+        apiKey:process.env.API_KEY,
       },
     ],
     chatGptRetryTimes: Number(process.env.CHAT_GPT_RETRY_TIMES),
@@ -42,4 +42,5 @@ export const config: IConfig = {
   openAIProxy: configFile.openAIProxy,
   clearanceToken: configFile.clearanceToken,
   userAgent: configFile.userAgent,
+  apiKey :configFile.apiKey,
 };

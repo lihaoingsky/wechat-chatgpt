@@ -27,7 +27,7 @@ export class ChatGPTPool {
   async resetAccount(account: IAccount) {
     // Remove all conversation information
     this.conversationsPool.forEach((item, key) => {
-      if ((item.account as AccountWithUserInfo)?.apiKey === account.apiKey) {
+      if ((item.account as AccountWithUserInfo)?.email === account.email) {
         this.conversationsPool.delete(key);
       }
     });
@@ -38,22 +38,22 @@ export class ChatGPTPool {
       ): item is IChatGPTItem & {
         account: AccountWithUserInfo;
         chatGpt: ChatGPTAPI;
-      } => item.account.apiKey === account.apiKey
+      } => item.account.email === account.email
     );
     if (chatGPTItem) {
       const account = chatGPTItem.account;
       try {
         chatGPTItem.chatGpt = new ChatGPTAPI({
-          ...account,
+          apiKey:config.apiKey
         });
       } catch (err) {
         //remove this object
         this.chatGPTPools = this.chatGPTPools.filter(
           (item) =>
-            (item.account as AccountWithUserInfo)?.apiKey !== account.apiKey
+            (item.account as AccountWithUserInfo)?.email !== account.email
         );
         console.error(
-          `Try reset account: ${account.apiKey} failed: ${err}, remove it from pool`
+          `Try reset account: ${account.email} failed: ${err}, remove it from pool`
         );
       }
     }
@@ -65,22 +65,22 @@ export class ChatGPTPool {
     const chatGPTPools = [];
     for (const account of config.chatGPTAccountPool) {
       const chatGpt = new ChatGPTAPI({
-        ...account,
+        ...account
       });
       try {
-        await AsyncRetry(
-          async () => {
-            await chatGpt.sendMessage("hello");
-          },
-          { retries: 3 }
-        );
+        // await AsyncRetry(
+        //   async () => {
+        //     await chatGpt.initSession();
+        //   },
+        //   { retries: 3 }
+        // );
         chatGPTPools.push({
           chatGpt: chatGpt,
           account: account,
         });
       } catch {
         console.error(
-          `Try init account: ${account.apiKey} failed, remove it from pool`
+          `Try init account: ${account.email} failed, remove it from pool`
         );
       }
     }
@@ -149,7 +149,7 @@ export class ChatGPTPool {
   // send message with talkid
   async sendMessage(message: string, talkid: string): Promise<string> {
     if (
-      Commands.some((cmd) => {
+      Commands.some((cmd) => { 
         return message.startsWith(cmd);
       })
     ) {
@@ -160,11 +160,12 @@ export class ChatGPTPool {
       conversationItem;
     try {
       // TODO: Add Retry logic
-      let msg = await conversation.sendMessage(message, {
-        conversationId, messageId
+      let msg  = await conversation.sendMessage(message, {
+        conversationId,
+        parentMessageId: messageId,
       });
       // Update conversation information
-      this.setConversation(talkid, msg.conversationId || '', msg.id);
+      this.setConversation(talkid, msg.conversationId as any, msg.id);
       return msg.text;
     } catch (err: any) {
       if (err.message.includes("ChatGPT failed to refresh auth token")) {

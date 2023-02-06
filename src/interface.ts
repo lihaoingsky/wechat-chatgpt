@@ -1,9 +1,9 @@
 import { ChatGPTAPI } from "chatgpt";
 export interface AccountWithUserInfo {
-  // password: string;
-  // email: string;
-  // isGoogleLogin: boolean;
-  apiKey: string;
+  password: string;
+  email: string;
+  isGoogleLogin: boolean;
+  apiKey : string;
 }
 
 // Account will be one in the session token or email and password
@@ -26,5 +26,6 @@ export interface IConfig {
   chatPrivateTiggerKeyword: string;
   openAIProxy?: string;
   clearanceToken: string;
+  apiKey:string;
   userAgent: string;
 }
